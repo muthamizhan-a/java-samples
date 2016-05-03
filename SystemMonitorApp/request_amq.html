@@ -1,0 +1,56 @@
+<head>
+<title>TCP Socket test</title>
+
+<script type="text/javascript">
+
+
+	
+	
+	function send() {
+		var mail = document.getElementById("mail").value;
+		const ws = new WebSocket('ws://localhost:61614', 'stomp');
+		 
+		ws.onopen = () => {
+		    ws.send('CONNECT\n\n\0');
+		 
+		    ws.send('SEND\ndestination:REQUEST\n\n'+mail+'\0');
+		    alert('Request send to AMQ successfuly!');
+		    ws.send('DISCONNECT\n\n\0');
+		    receive() ;
+		  };
+	}
+
+	function receive() {
+		const ws = new WebSocket('ws://localhost:61614', 'stomp');
+		ws.onopen = () => {
+		    ws.send('CONNECT\n\n\0');
+		 
+		    ws.send('SUBSCRIBE\ndestination:RESPONSE\n\nack:auto\n\n\0');
+		 
+		   // ws.send('DISCONNECT\n\n\0');
+		  };
+		 
+		ws.onmessage = (e) => {
+		 
+		    if (e.data.startsWith('MESSAGE'))
+		    	{
+		     // console.log(e.data);
+		     // alert('=========>'+e.data);
+		      document.getElementById('result').innerHTML +=e.data;
+		    	}
+		    
+		 
+		  };
+	}
+</script>
+</head>
+
+<body>
+	E-mail
+	<input type="text" id="mail" name="mail">
+	<br>
+	<button onclick="send()">Send request</button>
+	<button onclick="disconnect()">Disconnect</button>
+	<div id="result"></div>
+</body>
+</html>
